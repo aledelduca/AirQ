@@ -1,0 +1,61 @@
+version: "3"
+services:
+
+  influxdb:
+    image: influxdb
+    container_name: influxdb
+    environment:
+      - INFLUXDB_DB
+      - INFLUXDB_ADMIN_USER
+      - INFLUXDB_ADMIN_PASSWORD
+      - INFLUXDB_READ_USER
+      - INFLUXDB_READ_USER_PASSWORD
+      - INFLUXDB_WRITE_USER
+      - INFLUXDB_WRITE_USER_PASSWORD
+    volumes:
+      - influxdb:/var/lib/influxdb
+    networks:
+      - airq-network
+    restart: always
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    environment:
+      - INFLUXDB_DB
+      - INFLUXDB_READ_USER
+      - INFLUXDB_READ_USER_PASSWORD
+    volumes:
+      - grafana:/var/lib/grafana
+      - ${HOST_SSL_PATH}:/etc/ssl:ro
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    networks:
+      - airq-network
+    restart: always
+
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    volumes:
+      - ./nginx/templates:/etc/nginx/templates:ro
+      - ${HOST_SSL_PATH}:/etc/ssl:ro
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      - airq-network
+    environment:
+      - TLS_CERTIFICATE
+      - TLS_PRIVATE_KEY
+      - TLS_DHPARAM
+      - HOSTNAME
+    depends_on:
+      - influxdb
+      - grafana
+    restart: always
+
+volumes:
+  influxdb:
+  grafana:
+networks:
+  airq-network:
