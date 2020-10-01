@@ -1,0 +1,26 @@
+services:
+  influxdb:
+    restart: always
+
+  grafana:
+    restart: always
+
+  nginx:
+    restart: unless-stopped
+    volumes:
+      - ./certbot/conf:/etc/nginx/ssl
+      - ./certbot/data:/var/www/certbot
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done $ nginx -g \"daemon off;\"'"
+
+  certbot:
+    image: certbot/certbot:latest
+    environment:
+      - DOMAIN
+      - EMAIL
+    command: certonly --webroot --webroot-path=/var/www/certbot --email ${EMAIL} --agree-tos --no-eff-email -d ${DOMAIN}
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/logs:/var/log/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    restart: unless-stopped
