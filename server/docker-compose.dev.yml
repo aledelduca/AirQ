@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+
+  grafana:
+    volumes:
+      - ${HOST_SSL_PATH}:/etc/ssl:ro
+
+  nginx:
+    volumes:
+      - ${HOST_SSL_PATH}:/etc/ssl:ro
+    environment:
+      - TLS_CERTIFICATE
+      - TLS_PRIVATE_KEY
+      - TLS_DHPARAM
+      - ENV=dev
