@@ -12,6 +12,9 @@ services:
       - INFLUXDB_READ_USER_PASSWORD
       - INFLUXDB_WRITE_USER
       - INFLUXDB_WRITE_USER_PASSWORD
+#    labels:
+#      - "traefik.enable=true"
+#      - "traefik.http.routers.influx.rule=Host(`airq.localhost`)"
     volumes:
       - influxdb:/var/lib/influxdb
     networks:
@@ -20,6 +23,12 @@ services:
   grafana:
     image: grafana/grafana
     container_name: grafana
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`${HOST_NAME}`)"
+      # - "traefik.http.routers.grafana.entrypoints=web"
+      # - "traefik.http.routers.grafana.entrypoints=websecure"
+      - "traefik.http.routers.grafana.tls=true"
     environment:
       - INFLUXDB_DB
       - INFLUXDB_READ_USER
@@ -30,21 +39,31 @@ services:
     networks:
       - airq-network
 
-  nginx:
-    build: ./nginx
-    container_name: nginx
-    volumes:
-      - ./nginx/templates/${ENV}:/etc/nginx/templates:ro
+
+  traefik:
+    image: "traefik:2.4.7"
+    container_name: traefik
     ports:
-      - 80:80
-      - 443:443
+      - "80:80"
+      - "443:443"
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      # - "--certificatesresolvers.myresolver.acme.email=${EMAIL}"
+      # - "--certificatesresolvers.myresolver.acme.storage=/etc/traefik/acme/acme.json"
+      # - "--entryPoints.mysql.address=:3306"
+    depends_on:
+      - grafana
+      - influxdb
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
       - airq-network
-    environment:
-      - DOMAIN
-    depends_on:
-      - influxdb
-      - grafana
+
 
 volumes:
   influxdb:

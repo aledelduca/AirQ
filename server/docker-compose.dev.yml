@@ -2,15 +2,11 @@ version: "3"
 
 services:
 
-  grafana:
-    volumes:
-      - ${HOST_SSL_PATH}:/etc/ssl:ro
+  traefik:
+    ports:
+      - "8080:8080"
+    command:
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
 
-  nginx:
-    volumes:
-      - ${HOST_SSL_PATH}:/etc/ssl:ro
-    environment:
-      - TLS_CERTIFICATE
-      - TLS_PRIVATE_KEY
-      - TLS_DHPARAM
-      - ENV=dev
+
