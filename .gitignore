@@ -134,3 +134,5 @@ dmypy.json
 *.pem
 sensor_app/*
 .idea
+server/orchestration/data/*
+server/orchestration/letsencrypt/*
