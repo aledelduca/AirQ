@@ -1,4 +1,4 @@
-version: "3"
+version: '3'
 services:
 
   influxdb:
@@ -14,8 +14,6 @@ services:
       - INFLUXDB_WRITE_USER_PASSWORD
     volumes:
       - influxdb:/var/lib/influxdb
-    networks:
-      - airq-network
 
   grafana:
     image: grafana/grafana
@@ -27,27 +25,13 @@ services:
     volumes:
       - grafana:/var/lib/grafana
       - ./grafana/provisioning/:/etc/grafana/provisioning/
-    networks:
-      - airq-network
 
-  nginx:
-    build: ./nginx
-    container_name: nginx
-    volumes:
-      - ./nginx/templates/${ENV}:/etc/nginx/templates:ro
-    ports:
-      - 80:80
-      - 443:443
-    networks:
-      - airq-network
-    environment:
-      - DOMAIN
-    depends_on:
-      - influxdb
-      - grafana
 
 volumes:
   influxdb:
   grafana:
+
 networks:
-  airq-network:
+  default:
+    external:
+      name: airq-network
