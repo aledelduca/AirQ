@@ -26,7 +26,9 @@ services:
       - INFLUXDB_READ_USER_PASSWORD
     volumes:
       - grafana:/var/lib/grafana
-      - ./grafana/provisioning/:/etc/grafana/provisioning/
+      - type: bind
+        source: ${GR_PROVISIONING_PATH}
+        target: /etc/grafana/provisioning/
     networks:
       - airq-network
 
