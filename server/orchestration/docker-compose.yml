@@ -1,0 +1,31 @@
+version: '3'
+services:
+
+  portainer:
+    image: portainer/portainer-ce
+    container_name: portainer
+    privileged: true
+    volumes:
+      - './data:/data'
+      - '/var/run/docker.sock:/var/run/docker.sock'
+
+    restart: always
+
+  np-manager:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: np-manager
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    environment:
+      DB_SQLITE_FILE: "/data/database.sqlite"
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    restart: always
+
+networks:
+  default:
+    external:
+      name: airq-network
