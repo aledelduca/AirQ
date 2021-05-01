@@ -14,8 +14,6 @@ services:
       - INFLUXDB_WRITE_USER_PASSWORD
     volumes:
       - influxdb:/var/lib/influxdb
-    networks:
-      - airq-network
 
   grafana:
     image: grafana/grafana
@@ -29,8 +27,6 @@ services:
       - type: bind
         source: ${GR_PROVISIONING_PATH}
         target: /etc/grafana/provisioning/
-    networks:
-      - airq-network
 
 
 volumes:
