@@ -1,0 +1,30 @@
+services: 
+  bme680:
+    container_name: bme680
+    image: bme680
+    build: 
+      context: ./custom/bme680
+      dockerfile: Dockerfile
+    restart: 'no'
+    environment:
+    - TZ=Etc/UTC
+    - IOTSTACK_UID=1000
+    - IOTSTACK_GID=1000
+    devices:
+    - /dev/i2c-1:/dev/i2c-1
+
+  owm:
+    container_name: owm
+    image: owm
+    build: 
+      context: ./custom/owm
+      dockerfile: Dockerfile
+    restart: 'no'
+    environment:
+    - TZ=Etc/UTC
+    - IOTSTACK_UID=1000
+    - IOTSTACK_GID=1000
+    - OWM_API_KEY=${OWM_API_KEY}
+    - LATITUDE=${LATITUDE}
+    - LONGITUDE=${LONGITUDE}
+
