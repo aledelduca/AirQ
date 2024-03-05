@@ -39,8 +39,7 @@ def run():
 
     while True:
         data = get_metrics(pollution_mgr)
-        print(data)
-        # publish_data(data)
+        publish_data(data)
         sleep(TIME_INTERVAL)
 
 
