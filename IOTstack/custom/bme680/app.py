@@ -11,7 +11,6 @@ from typing import Dict
 BROKER = os.getenv('MQTT_HOST', 'mosquitto')
 PORT = int(os.getenv('MQTT_PORT', '1883'))
 TOPIC = os.getenv('MQTT_TOPIC', '/sensors/bme680')
-TIME_INTERVAL = 10
 
 
 def init_sensor() -> bme680.BME680:
@@ -47,12 +46,8 @@ def publish_data(data: str) -> None:
 
 def run():
     sensor = init_sensor()
-
-    while True:
-
-        data = get_metrics(sensor)
-        publish_data(data)
-        sleep(TIME_INTERVAL)
+    data = get_metrics(sensor)
+    publish_data(data)
 
 
 if __name__ == '__main__':
