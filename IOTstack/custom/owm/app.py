@@ -36,11 +36,9 @@ def init_manager() -> OWM:
 
 def run():
     pollution_mgr = init_manager()
-
-    while True:
-        data = get_metrics(pollution_mgr)
-        publish_data(data)
-        sleep(TIME_INTERVAL)
+    data = get_metrics(pollution_mgr)
+    publish_data(data)
+    pollution_mgr.close()
 
 
 if __name__ == '__main__':
