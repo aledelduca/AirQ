@@ -15,6 +15,8 @@ TOPIC = os.getenv('MQTT_TOPIC', '/sensors/bme680')
 
 def init_sensor() -> bme680.BME680:
     sensor = bme680.BME680(bme680.I2C_ADDR_PRIMARY)
+    sensor.set_gas_heater_status(bme680.GAS_HEAT_DISABLE)
+    sensor.set_gas_status(bme680.DISABLE_GAS_MEAS)
     sensor.set_humidity_oversample(bme680.OS_4X)
     sensor.set_pressure_oversample(bme680.OS_8X)
     sensor.set_temperature_oversample(bme680.OS_16X)
