@@ -24,7 +24,7 @@ def get_metrics(pollution_mgr: OWM.airpollution_manager) -> str:
     observation = pollution_mgr.air_quality_at_coords(lat=LATITUDE, lon=LONGITUDE)
     p = observation.to_dict()
     return json.dumps({
-        'datetime': datetime.fromtimestamp(p.get('reference_time', datetime.now().timestamp()), timezone.tzname).astimezone().isoformat(),
+        'datetime': datetime.fromtimestamp(p.get('reference_time', datetime.now().timestamp()), timezone.utc).astimezone().isoformat(),
         **p.get('air_quality_data', {})
     })
 
