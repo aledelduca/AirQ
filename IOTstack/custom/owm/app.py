@@ -12,7 +12,7 @@ LONGITUDE = float(os.getenv('LONGITUDE', '0'))
 OWM_API_KEY = os.getenv('OWM_API_KEY', '')
 BROKER = os.getenv('MQTT_HOST', 'mosquitto')
 PORT = int(os.getenv('MQTT_PORT', '1883'))
-TOPIC = os.getenv('MQTT_TOPIC', '/sensors/owm')
+TOPIC = os.getenv('MQTT_TOPIC', 'sensors/owm')
 TIME_INTERVAL = 60 * 5  # 5 minutes
 
 
@@ -24,7 +24,7 @@ def get_metrics(pollution_mgr: OWM.airpollution_manager) -> str:
     observation = pollution_mgr.air_quality_at_coords(lat=LATITUDE, lon=LONGITUDE)
     p = observation.to_dict()
     return json.dumps({
-        'datetime': datetime.fromtimestamp(p.get('reference_time', datetime.now().timestamp()), timezone.utc).astimezone().isoformat(),
+        'datetime': datetime.fromtimestamp(p.get('reference_time', datetime.now().timestamp()), timezone.tzname).astimezone().isoformat(),
         **p.get('air_quality_data', {})
     })
 
@@ -38,8 +38,6 @@ def run():
     pollution_mgr = init_manager()
     data = get_metrics(pollution_mgr)
     publish_data(data)
-    pollution_mgr.close()
-
 
 if __name__ == '__main__':
     run()
