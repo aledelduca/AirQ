@@ -4,9 +4,8 @@ import json
 
 import paho.mqtt.publish as publish
 
-from datetime import datetime, timezone
+from datetime import datetime
 from zoneinfo import ZoneInfo
-from time import sleep
 from typing import Dict
 
 BROKER = os.getenv('MQTT_HOST', 'mosquitto')
