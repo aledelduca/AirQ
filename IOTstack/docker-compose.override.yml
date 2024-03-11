@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     restart: 'no'
     environment:
-    - TZ=Etc/UTC
+    - TZ=${TZ}
     - IOTSTACK_UID=1000
     - IOTSTACK_GID=1000
     devices:
@@ -21,7 +21,7 @@ services:
       dockerfile: Dockerfile
     restart: 'no'
     environment:
-    - TZ=Etc/UTC
+    - TZ=${TZ}
     - IOTSTACK_UID=1000
     - IOTSTACK_GID=1000
     - OWM_API_KEY=${OWM_API_KEY}
