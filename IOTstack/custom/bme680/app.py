@@ -40,12 +40,10 @@ def get_metrics(sensor: bme680.BME680) -> str:
         'humidity': humidity,
         'pressure': pressure
     })
-timezone.tzname()
 
 def publish_data(data: str) -> None:
     
     publish.single(topic=TOPIC, payload=data, hostname=BROKER, port=PORT)
-
 
 
 def run():
