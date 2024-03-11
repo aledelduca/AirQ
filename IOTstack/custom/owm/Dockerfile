@@ -18,4 +18,4 @@ COPY requirements.txt ./
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD [ "cron", "-f" ]
+CMD ["/bin/bash", "-c", "printenv > /etc/environment && cron -f"]
