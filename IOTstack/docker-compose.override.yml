@@ -6,6 +6,13 @@ services:
       context: ./custom/bme680
       dockerfile: Dockerfile
     restart: 'no'
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+      telegraf:
+        condition: service_started
+      influxdb:
+        condition: service_healthy
     environment:
     - TZ=${TZ}
     - IOTSTACK_UID=1000
@@ -20,6 +27,13 @@ services:
       context: ./custom/owm
       dockerfile: Dockerfile
     restart: 'no'
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+      telegraf:
+        condition: service_started
+      influxdb:
+        condition: service_healthy
     environment:
     - TZ=${TZ}
     - IOTSTACK_UID=1000
