@@ -20,7 +20,8 @@ init-dotenv:
 	fi
 
 set-up:
-
-	cp -r IOTstack/custom $(IOTSTACK_ROOT)
-	cp docker-compose.override.yml $(IOTSTACK_ROOT)
-	cp .env $(IOTSTACK_ROOT)
+	@echo "Setting up the project..."
+	@cp -r IOTstack/custom $(IOTSTACK_ROOT)
+	@cp IOTstack/docker-compose.override.yml $(IOTSTACK_ROOT)
+	@cp .env $(IOTSTACK_ROOT)
+	sudo cp -r IOTstack/volumes $(IOTSTACK_ROOT)
