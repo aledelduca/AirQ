@@ -38,7 +38,6 @@ def degrees_to_cardinal(d):
 def get_weather_metrics(weather_mgr: OWM.weather_manager) -> Dict:
     observation = weather_mgr.weather_at_coords(lat=LATITUDE, lon=LONGITUDE)
     w = observation
-
     temperature_data = w.weather.temperature('celsius')
     temperature = temperature_data.get('temp', 99)
 
@@ -49,12 +48,17 @@ def get_weather_metrics(weather_mgr: OWM.weather_manager) -> Dict:
     humidity = w.weather.humidity
     pressure = w.weather.pressure.get('press', -1)
 
+    status = w.weather.status
+    detailed_status = w.weather.detailed_status
+
     return {
         'temperature': temperature,
         'humidity': humidity,
         'pressure': pressure,
         'wind_speed': wind_speed,
-        'wind_direction': wind_direction
+        'wind_direction': wind_direction,
+        'status': status,
+        'detailed_status': detailed_status
     }
 
 
@@ -74,6 +78,7 @@ def run():
         **weather_data
     })
     publish_data(data)
+
 
 
 if __name__ == '__main__':
