@@ -42,3 +42,23 @@ services:
     - LATITUDE=${LATITUDE}
     - LONGITUDE=${LONGITUDE}
 
+  sds011:
+    container_name: sds011
+    image: sds011
+    build: 
+      context: ./custom/sds011
+      dockerfile: Dockerfile
+    restart: 'no'
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+      telegraf:
+        condition: service_started
+      influxdb:
+        condition: service_healthy
+    environment:
+    - TZ=${TZ}
+    - IOTSTACK_UID=1000
+    - IOTSTACK_GID=1000
+    devices:
+    - /dev/ttyUSB0:/dev/ttyUSB0

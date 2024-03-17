@@ -11,7 +11,7 @@ from typing import Dict
 BROKER = os.getenv('MQTT_HOST', 'mosquitto')
 PORT = int(os.getenv('MQTT_PORT', '1883'))
 TOPIC = os.getenv('MQTT_TOPIC', 'sensors/bme680')
-TZ= os.getenv('TZ', 'UTC')
+TZ = os.getenv('TZ', 'UTC')
 
 
 def init_sensor() -> bme680.BME680:
@@ -25,30 +25,32 @@ def init_sensor() -> bme680.BME680:
     return sensor
 
 
-def get_metrics(sensor: bme680.BME680) -> str:
-       
+def get_metrics(sensor: bme680.BME680) -> Dict:
+
     if sensor.get_sensor_data():
-        timestamp = datetime.now(tz=ZoneInfo(TZ)).isoformat()         # YYYY-MM-DDThh:mm:ss.sss±hh:mm 
-        temperature = sensor.data.temperature                                   # °C
-        humidity = sensor.data.humidity                                         # %RH
-        pressure = sensor.data.pressure                                         # hPa
-    
-    return json.dumps({
-        'datetime': timestamp,
-        'temperature': temperature,
-        'humidity': humidity,
-        'pressure': pressure
-    })
+        timestamp = datetime.now(tz=ZoneInfo(TZ)).isoformat()
+        temperature = sensor.data.temperature
+        humidity = sensor.data.humidity
+        pressure = sensor.data.pressure
+
+        return {
+            'datetime': timestamp,
+            'temperature': temperature,
+            'humidity': humidity,
+            'pressure': pressure
+        }
+    else:
+        return {'error': 'Failed to read sensor'}
+
 
 def publish_data(data: str) -> None:
-    
     publish.single(topic=TOPIC, payload=data, hostname=BROKER, port=PORT)
 
 
 def run():
     sensor = init_sensor()
     data = get_metrics(sensor)
-    publish_data(data)
+    publish_data(json.dumps(data))
 
 
 if __name__ == '__main__':

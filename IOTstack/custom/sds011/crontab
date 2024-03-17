@@ -1,0 +1,1 @@
+*/10 * * * * /usr/bin/flock /usr/src/app/app.lock /usr/local/bin/python /usr/src/app/app.py

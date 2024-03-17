@@ -7,14 +7,13 @@ from zoneinfo import ZoneInfo
 from pyowm import OWM
 
 
-
 LATITUDE = float(os.getenv('LATITUDE', '0'))
 LONGITUDE = float(os.getenv('LONGITUDE', '0'))
 OWM_API_KEY = os.getenv('OWM_API_KEY', '')
 BROKER = os.getenv('MQTT_HOST', 'mosquitto')
 PORT = int(os.getenv('MQTT_PORT', '1883'))
 TOPIC = os.getenv('MQTT_TOPIC', 'sensors/owm')
-TZ= os.getenv('TZ', 'UTC')
+TZ = os.getenv('TZ', 'UTC')
 
 
 def publish_data(data: str) -> None:
@@ -25,7 +24,7 @@ def get_pollution_metrics(pollution_mgr: OWM.airpollution_manager) -> Dict:
     p = pollution_mgr.air_quality_at_coords(lat=LATITUDE, lon=LONGITUDE)
     air_quality_data = p.air_quality_data
     return air_quality_data
-    
+
 
 def degrees_to_cardinal(d):
 
