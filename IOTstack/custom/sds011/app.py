@@ -45,7 +45,7 @@ def get_rolling_average(sensor: SDS011QueryReader) -> Dict:
     return {
         'pm25': round(mean(data['pm25']), 2),
         'pm10': round(mean(data['pm10']), 2),
-        'timestamp': datetime.now(tz=ZoneInfo(TZ)).isoformat()
+        'datetime': datetime.now(tz=ZoneInfo(TZ)).isoformat()
     }
 
 
