@@ -1,18 +1,18 @@
-import os
 import json
-import paho.mqtt.publish as publish
-from statistics import mean
-from sds011lib import SDS011QueryReader
+import os
 from datetime import datetime
-from zoneinfo import ZoneInfo
-from typing import Dict
+from statistics import mean
 from time import sleep
+from typing import Dict
+from zoneinfo import ZoneInfo
+
+import paho.mqtt.publish as publish
+from sds011lib import SDS011QueryReader
 
 
 BROKER = os.getenv('MQTT_HOST', 'mosquitto')
 PORT = int(os.getenv('MQTT_PORT', '1883'))
 TOPIC = os.getenv('MQTT_TOPIC', 'sensors/sds011')
-PORT = int(os.getenv('MQTT_PORT', '1883'))
 DEVICE = os.getenv('SDS011_PORT', '/dev/ttyUSB0')
 TZ = os.getenv('TZ', 'UTC')
 WARM_UP_TIME = int(os.getenv('WARM_UP_TIME', '15'))
@@ -24,7 +24,7 @@ def publish_data(data: str) -> None:
 
 
 def get_rolling_average(sensor: SDS011QueryReader) -> Dict:
-    data = {
+    data: Dict = {
         'pm25': [],
         'pm10': []
     }
@@ -34,11 +34,10 @@ def get_rolling_average(sensor: SDS011QueryReader) -> Dict:
             result = sensor.query()
             data['pm25'].append(result.pm25)
             data['pm10'].append(result.pm10)
-            print(data)
             sleep(.5)
     except Exception as e:
         print(e)
-        data = {'error': 'Failed to read sensor'}
+        data['error'] = ['Failed to read sensor']
     finally:
         sensor.sleep()
 

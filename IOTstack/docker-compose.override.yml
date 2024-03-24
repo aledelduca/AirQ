@@ -1,8 +1,8 @@
-services: 
+services:
   bme680:
     container_name: bme680
     image: bme680
-    build: 
+    build:
       context: ./custom/bme680
       dockerfile: Dockerfile
     restart: 'no'
@@ -23,7 +23,7 @@ services:
   owm:
     container_name: owm
     image: owm
-    build: 
+    build:
       context: ./custom/owm
       dockerfile: Dockerfile
     restart: 'no'
@@ -45,7 +45,7 @@ services:
   sds011:
     container_name: sds011
     image: sds011
-    build: 
+    build:
       context: ./custom/sds011
       dockerfile: Dockerfile
     restart: 'no'
