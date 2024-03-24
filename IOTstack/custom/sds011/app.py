@@ -12,7 +12,8 @@ from time import sleep
 BROKER = os.getenv('MQTT_HOST', 'mosquitto')
 PORT = int(os.getenv('MQTT_PORT', '1883'))
 TOPIC = os.getenv('MQTT_TOPIC', 'sensors/sds011')
-PORT = os.getenv('SDS011_PORT', '/dev/ttyUSB0')
+PORT = int(os.getenv('MQTT_PORT', '1883'))
+DEVICE = os.getenv('SDS011_PORT', '/dev/ttyUSB0')
 TZ = os.getenv('TZ', 'UTC')
 WARM_UP_TIME = int(os.getenv('WARM_UP_TIME', '15'))
 COLLECT_TIME = int(os.getenv('COLLECT_TIME', '15'))
@@ -49,7 +50,7 @@ def get_rolling_average(sensor: SDS011QueryReader) -> Dict:
 
 
 def init_sensor() -> SDS011QueryReader:
-    sensor = SDS011QueryReader(PORT)
+    sensor = SDS011QueryReader(DEVICE)
     sensor.wake()
     sleep(WARM_UP_TIME)
     return sensor
