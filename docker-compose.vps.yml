@@ -1,0 +1,67 @@
+version: '3.8'
+
+# VPS-side docker-compose for hybrid Pi + VPS setup
+# Telegraf subscribes to Pi's MQTT (via Tailscale)
+# Data flows: Pi MQTT → VPS Telegraf → VictoriaMetrics → Grafana
+
+services:
+  telegraf:
+    image: telegraf:latest
+    container_name: telegraf
+    volumes:
+      - ./configs/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    environment:
+      - HOSTNAME=airq-vps
+      - MQTT_BROKER=${MQTT_BROKER:-100.x.x.x}  # Pi's Tailscale IP
+      - MQTT_PORT=${MQTT_PORT:-1883}
+      - VICTORIA_URL=http://victoria-metrics:8428
+    depends_on:
+      - victoria-metrics
+    restart: unless-stopped
+
+  victoria-metrics:
+    image: victoriametrics/victoria-metrics:latest
+    container_name: victoria-metrics
+    ports:
+      - "8428:8428"
+    volumes:
+      - victoria_data:/storage
+    command:
+      - "--storageDataPath=/storage"
+      - "--retentionPeriod=90d"  # Keep 90 days of data
+      - "--maxConcurrentInserts=10"
+      - "--maxConcurrentSelects=10"
+    environment:
+      - TZ=${TZ:-UTC}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8428/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./configs/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - ./configs/grafana-dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+      - TZ=${TZ:-UTC}
+    depends_on:
+      - victoria-metrics
+    restart: unless-stopped
+
+volumes:
+  victoria_data:
+  grafana_data:
+
+networks:
+  default:
+    name: airq-vps

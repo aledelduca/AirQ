@@ -1,0 +1,132 @@
+{
+  "dashboard": {
+    "title": "AirQ - Home Air Quality",
+    "tags": ["airq", "sensors", "home"],
+    "timezone": "browser",
+    "schemaVersion": 27,
+    "version": 0,
+    "refresh": "30s",
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Temperature",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 0, "w": 6, "h": 8},
+        "targets": [
+          {
+            "expr": "temperature{sensor_type=\"bme680\"}",
+            "legendFormat": "Temperature (°C)",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Temperature (°C)",
+            "format": "short"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Humidity",
+        "type": "graph",
+        "gridPos": {"x": 6, "y": 0, "w": 6, "h": 8},
+        "targets": [
+          {
+            "expr": "humidity{sensor_type=\"bme680\"}",
+            "legendFormat": "Humidity (%)",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Humidity (%)",
+            "format": "percent",
+            "max": 100,
+            "min": 0
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Pressure",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 0, "w": 6, "h": 8},
+        "targets": [
+          {
+            "expr": "pressure{sensor_type=\"bme680\"}",
+            "legendFormat": "Pressure (hPa)",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Pressure (hPa)",
+            "format": "short"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "CO2 Level",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 8, "w": 8, "h": 8},
+        "targets": [
+          {
+            "expr": "co2_ppm{sensor_type=\"mh_z19c\"}",
+            "legendFormat": "CO2 (ppm)",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "CO2 (ppm)",
+            "format": "short"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Particulate Matter",
+        "type": "graph",
+        "gridPos": {"x": 8, "y": 8, "w": 8, "h": 8},
+        "targets": [
+          {
+            "expr": "pm25{sensor_type=\"sds011\"}",
+            "legendFormat": "PM2.5 (µg/m³)",
+            "refId": "A"
+          },
+          {
+            "expr": "pm10{sensor_type=\"sds011\"}",
+            "legendFormat": "PM10 (µg/m³)",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Particulate (µg/m³)",
+            "format": "short"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Data Ingestion Rate",
+        "type": "stat",
+        "gridPos": {"x": 16, "y": 8, "w": 8, "h": 8},
+        "targets": [
+          {
+            "expr": "count(count by (sensor_type) (timestamp)) or vector(0)",
+            "legendFormat": "Active Sensors",
+            "refId": "A"
+          }
+        ]
+      }
+    ]
+  },
+  "overwrite": false
+}

@@ -1,0 +1,133 @@
+version: '3.8'
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: mosquitto
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_logs:/mosquitto/log
+    environment:
+      - TZ=${TZ:-UTC}
+    healthcheck:
+      test: ["CMD", "mosquitto_sub", "-h", "localhost", "-t", "$$SYS/#", "-C", "1", "-id", "healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    # Note: For remote access via Tailscale, ensure firewall allows port 1883
+    # Or use host network mode if on Pi (less isolated but simpler)
+    restart: unless-stopped
+
+  bme680:
+    build:
+      context: .
+      dockerfile: containers/bme680/Dockerfile
+    container_name: bme680
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+    environment:
+      - MQTT_HOST=mosquitto
+      - MQTT_PORT=1883
+      - MQTT_TOPIC=sensors/bme680
+      - TZ=${TZ:-UTC}
+    devices:
+      - /dev/i2c-1:/dev/i2c-1
+    labels:
+      ofelia.enabled: "true"
+      ofelia.job-exec.bme680_read.schedule: "@every 5m"
+      ofelia.job-exec.bme680_read.command: "curl -f http://localhost:8000/run"
+    restart: unless-stopped
+
+  sds011:
+    build:
+      context: .
+      dockerfile: containers/sds011/Dockerfile
+    container_name: sds011
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+    environment:
+      - MQTT_HOST=mosquitto
+      - MQTT_PORT=1883
+      - MQTT_TOPIC=sensors/sds011
+      - SDS011_PORT=/dev/ttyUSB0
+      - TZ=${TZ:-UTC}
+      - COLLECT_TIME=15
+      - WARM_UP_TIME=15
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
+    labels:
+      ofelia.enabled: "true"
+      ofelia.job-exec.sds011_read.schedule: "@every 30m"
+      ofelia.job-exec.sds011_read.command: "curl -f http://localhost:8000/run"
+    restart: unless-stopped
+
+  owm:
+    build:
+      context: .
+      dockerfile: containers/owm/Dockerfile
+    container_name: owm
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+    environment:
+      - MQTT_HOST=mosquitto
+      - MQTT_PORT=1883
+      - MQTT_TOPIC=sensors/owm
+      - OWM_API_KEY=${OWM_API_KEY}
+      - LATITUDE=${LATITUDE:-0}
+      - LONGITUDE=${LONGITUDE:-0}
+      - TZ=${TZ:-UTC}
+    labels:
+      ofelia.enabled: "true"
+      ofelia.job-exec.owm_read.schedule: "@every 30m"
+      ofelia.job-exec.owm_read.command: "curl -f http://localhost:8000/run"
+    restart: unless-stopped
+
+  mh_z19c:
+    build:
+      context: .
+      dockerfile: containers/mh_z19c/Dockerfile
+    container_name: mh_z19c
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+    environment:
+      - MQTT_HOST=mosquitto
+      - MQTT_PORT=1883
+      - MQTT_TOPIC=sensors/mh_z19c
+      # MH-Z19C uses 4-pin UART connector connected to Pi GPIO UART (pins 8/10)
+      - MHZ19_PORT=/dev/ttyAMA0
+      - TZ=${TZ:-UTC}
+    devices:
+      - /dev/ttyAMA0:/dev/ttyAMA0
+    labels:
+      ofelia.enabled: "true"
+      ofelia.job-exec.mh_z19c_read.schedule: "@every 5m"
+      ofelia.job-exec.mh_z19c_read.command: "curl -f http://localhost:8000/run"
+    restart: unless-stopped
+
+  ofelia:
+    image: mcuadros/ofelia:latest
+    container_name: ofelia
+    depends_on:
+      - bme680
+      - sds011
+      - owm
+      - mh_z19c
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: daemon --docker
+    restart: unless-stopped
+
+volumes:
+  mosquitto_data:
+  mosquitto_logs:
+
+networks:
+  default:
+    name: airq

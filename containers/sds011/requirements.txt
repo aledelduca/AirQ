@@ -1,0 +1,3 @@
+flask==2.3.3
+paho-mqtt==1.7.1
+sds011lib==0.0.13
