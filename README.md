@@ -110,6 +110,17 @@ Each sensor publishes to:
 4. Create `containers/your_sensor/requirements.txt`
 5. Add to `docker-compose.yml` with Ofelia labels
 
+## Updates & Maintenance
+
+**[👉 See UPDATES.md for update procedures](./UPDATES.md)**
+
+Quick reference:
+```bash
+./scripts/update.sh      # Update to latest
+./scripts/rollback.sh    # Rollback to previous version
+./scripts/healthcheck.sh # Verify all services healthy
+```
+
 ## Troubleshooting
 
 See [SETUP.md → Troubleshooting](./SETUP.md#troubleshooting) for complete troubleshooting guide.
