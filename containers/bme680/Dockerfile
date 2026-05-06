@@ -19,9 +19,12 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+# Copy shared library
+COPY lib ./lib
+
 # Copy sensor-specific files
-COPY app.py ./
-COPY requirements.txt ./
+COPY containers/bme680/app.py ./
+COPY containers/bme680/requirements.txt ./
 
 # Copy wheels from builder
 COPY --from=builder /wheels /wheels
