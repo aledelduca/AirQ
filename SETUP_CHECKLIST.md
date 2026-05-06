@@ -107,7 +107,7 @@ Use this checklist to ensure your Pi + VPS setup is complete and working.
 ## Extending Your Setup
 
 - [ ] Add more sensors:
-  - [ ] Create class in `lib/sensors/`
+  - [ ] Create class in `modules/sensors/`
   - [ ] Create app in `containers/`
   - [ ] Add to `docker-compose.yml` with Ofelia labels
   - [ ] Deploy: `podman-compose up -d --build`

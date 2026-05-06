@@ -3,7 +3,7 @@ FROM python:3.11-alpine
 WORKDIR /app
 
 # Copy shared library
-COPY lib ./lib
+COPY modules ./modules
 
 # Copy sensor-specific files
 COPY containers/sds011/requirements.txt .

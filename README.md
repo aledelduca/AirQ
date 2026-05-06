@@ -104,7 +104,7 @@ Each sensor publishes to:
 
 ### Adding a New Sensor
 
-1. Create `lib/sensors/your_sensor.py` inheriting from `Sensor`
+1. Create `modules/sensors/your_sensor.py` inheriting from `Sensor`
 2. Create `containers/your_sensor/app.py` (copy from another sensor)
 3. Create `containers/your_sensor/Dockerfile` (copy from another sensor)
 4. Create `containers/your_sensor/requirements.txt`

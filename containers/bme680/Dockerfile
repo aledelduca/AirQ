@@ -20,7 +20,7 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Copy shared library
-COPY lib ./lib
+COPY modules ./modules
 
 # Copy sensor-specific files
 COPY containers/bme680/app.py ./

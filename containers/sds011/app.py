@@ -1,12 +1,12 @@
 import sys
 import os
 
-# Add parent directory to path so we can import from lib
+# Add parent directory to path so we can import from modules
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from flask import Flask, jsonify
-from lib.sensors.sds011_sensor import SDS011Sensor
-from lib.mqtt_publisher import MQTTPublisher
+from modules.sensors.sds011_sensor import SDS011Sensor
+from modules.mqtt_publisher import MQTTPublisher
 
 app = Flask(__name__)
 
