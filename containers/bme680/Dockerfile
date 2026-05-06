@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and build wheels
-COPY requirements.txt .
+COPY containers/bme680/requirements.txt ./
 RUN pip wheel --no-cache-dir --no-binary :all: -r requirements.txt -w /wheels
 
 # Final stage
