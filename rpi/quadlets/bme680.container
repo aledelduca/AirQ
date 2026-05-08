@@ -1,0 +1,17 @@
+[Unit]
+Description=BME680 sensor measurement
+After=mosquitto.service
+
+[Container]
+Image=localhost/airq-sensor:latest
+EnvironmentFile=%h/AirQ/.env
+Environment=SENSOR_TYPE=bme680
+Environment=MQTT_HOST=mosquitto
+Environment=MQTT_PORT=1883
+Environment=MQTT_TOPIC=sensors/bme680
+AddDevice=/dev/i2c-1
+Network=airq.network
+
+[Service]
+Type=oneshot
+RemainAfterExit=no

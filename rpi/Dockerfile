@@ -14,4 +14,4 @@ COPY --from=builder /root/.local /root/.local
 COPY sensor/ ./sensor/
 COPY measure.py .
 ENV PATH=/root/.local/bin:$PATH
-CMD ["sleep", "infinity"]
+CMD ["python", "/app/measure.py"]

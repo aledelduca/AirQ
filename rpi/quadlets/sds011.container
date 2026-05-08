@@ -1,0 +1,20 @@
+[Unit]
+Description=SDS011 particulate matter measurement
+After=mosquitto.service
+
+[Container]
+Image=localhost/airq-sensor:latest
+EnvironmentFile=%h/AirQ/.env
+Environment=SENSOR_TYPE=sds011
+Environment=MQTT_HOST=mosquitto
+Environment=MQTT_PORT=1883
+Environment=MQTT_TOPIC=sensors/sds011
+Environment=SDS011_PORT=/dev/ttyUSB0
+Environment=WARM_UP_TIME=15
+Environment=COLLECT_TIME=15
+AddDevice=/dev/ttyUSB0
+Network=airq.network
+
+[Service]
+Type=oneshot
+RemainAfterExit=no

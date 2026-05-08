@@ -1,0 +1,9 @@
+[Unit]
+Description=Run OWM sensor every 5 minutes
+
+[Timer]
+OnUnitInactiveSec=5min
+AccuracySec=10s
+
+[Install]
+WantedBy=timers.target

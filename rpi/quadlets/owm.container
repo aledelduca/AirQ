@@ -1,0 +1,16 @@
+[Unit]
+Description=OpenWeatherMap sensor measurement
+After=mosquitto.service
+
+[Container]
+Image=localhost/airq-sensor:latest
+EnvironmentFile=%h/AirQ/.env
+Environment=SENSOR_TYPE=owm
+Environment=MQTT_HOST=mosquitto
+Environment=MQTT_PORT=1883
+Environment=MQTT_TOPIC=sensors/owm
+Network=airq.network
+
+[Service]
+Type=oneshot
+RemainAfterExit=no

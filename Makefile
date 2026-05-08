@@ -1,4 +1,6 @@
-.PHONY: init-dotenv build-rpi up-rpi down-rpi up-server down-server
+.PHONY: init-dotenv build-rpi install-rpi uninstall-rpi up-rpi down-rpi up-server down-server
+
+QUADLET_DIR := $(HOME)/.config/containers/systemd
 
 init-dotenv:
 	@echo "Checking if .env file exists..."
@@ -19,13 +21,28 @@ init-dotenv:
 	fi
 
 build-rpi:
-	podman compose --env-file .env -f rpi/compose.yml build
+	podman build -t airq-sensor:latest rpi/
+
+install-rpi:
+	install -Dm644 rpi/quadlets/* -t $(QUADLET_DIR)
+	systemctl --user daemon-reload
+
+uninstall-rpi:
+	rm -f $(QUADLET_DIR)/airq.network $(QUADLET_DIR)/mosquitto-data.volume \
+	      $(QUADLET_DIR)/mosquitto.container \
+	      $(QUADLET_DIR)/bme680.container $(QUADLET_DIR)/bme680.timer \
+	      $(QUADLET_DIR)/owm.container $(QUADLET_DIR)/owm.timer \
+	      $(QUADLET_DIR)/sds011.container $(QUADLET_DIR)/sds011.timer \
+	      $(QUADLET_DIR)/mhz19.container $(QUADLET_DIR)/mhz19.timer
+	systemctl --user daemon-reload
 
 up-rpi:
-	podman compose --env-file .env -f rpi/compose.yml up -d
+	systemctl --user enable --now mosquitto.service
+	systemctl --user enable --now bme680.timer owm.timer sds011.timer mhz19.timer
 
 down-rpi:
-	podman compose --env-file .env -f rpi/compose.yml down
+	systemctl --user disable --now bme680.timer owm.timer sds011.timer mhz19.timer
+	systemctl --user disable --now mosquitto.service
 
 up-server:
 	podman compose --env-file .env -f server/compose.yml --env-file .env up -d

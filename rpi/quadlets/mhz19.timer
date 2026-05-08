@@ -1,0 +1,9 @@
+[Unit]
+Description=Run MH-Z19 sensor every minute
+
+[Timer]
+OnUnitInactiveSec=1min
+AccuracySec=5s
+
+[Install]
+WantedBy=timers.target
