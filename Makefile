@@ -19,16 +19,16 @@ init-dotenv:
 	fi
 
 build-rpi:
-	docker compose -f rpi/compose.yml build
+	podman compose --env-file .env -f rpi/compose.yml build
 
 up-rpi:
-	docker compose -f rpi/compose.yml up -d
+	podman compose --env-file .env -f rpi/compose.yml up -d
 
 down-rpi:
-	docker compose -f rpi/compose.yml down
+	podman compose --env-file .env -f rpi/compose.yml down
 
 up-server:
-	docker compose -f server/compose.yml --env-file .env up -d
+	podman compose --env-file .env -f server/compose.yml --env-file .env up -d
 
 down-server:
-	docker compose -f server/compose.yml down
+	podman scompose --env-file .env -f server/compose.yml down
