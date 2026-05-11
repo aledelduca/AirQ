@@ -5,13 +5,14 @@ After=network-online.target
 [Container]
 Image=eclipse-mosquitto:2
 PublishPort=1883:1883
-Volume=%h/AirQ/rpi/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+Volume=%h/.airq/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro,Z
 Volume=mosquitto-data.volume:/mosquitto/data
 Network=airq.network
 ContainerName=mosquitto
 
 [Service]
 Restart=always
+EnvironmentFile=%h/.airq/config.env
 
 [Install]
 WantedBy=default.target
