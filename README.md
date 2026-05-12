@@ -20,6 +20,36 @@ Two independent stacks communicate over the network:
 Sensors → measure.py (systemd timer) → MQTT → Telegraf → VictoriaMetrics → Grafana
 ```
 
+```mermaid
+flowchart TD
+    subgraph rpi["Raspberry Pi"]
+        timers["systemd timers"]
+
+        subgraph containers["podman containers"]
+            bme680["bme680\ntemperature · humidity · pressure"]
+            sds011["sds011\nPM2.5 · PM10"]
+            mhz19["mhz19\nCO2 · temperature"]
+            owm["owm\nweather · air pollution"]
+        end
+
+        mosquitto["mosquitto\nMQTT broker"]
+
+        timers -->|"runs measure.py"| bme680 & sds011 & mhz19 & owm
+        bme680 & sds011 & mhz19 & owm -->|publish| mosquitto
+    end
+
+    subgraph server["Server / VPS"]
+        telegraf["telegraf"]
+        victoria["VictoriaMetrics"]
+        grafana["Grafana"]
+
+        telegraf -->|write| victoria
+        victoria -->|query| grafana
+    end
+
+    mosquitto -->|"MQTT (1883)"| telegraf
+```
+
 ## Sensors
 
 | Name | Measures | Interface | Schedule |
@@ -56,12 +86,17 @@ cp .env ~/.airq/config.env
 cp rpi/mosquitto/mosquitto.conf ~/.airq/mosquitto.conf
 ```
 
-**2. On the Raspberry Pi — build and install the sensor stack:**
+**2. On the Raspberry Pi — install and start the sensor stack:**
 
 ```bash
-make build-rpi       # build the sensor image
 make install-rpi     # install quadlets and timers into systemd
 make up-rpi          # enable and start mosquitto + all sensor timers
+```
+
+To rebuild the sensor image after code changes:
+
+```bash
+podman build -t airq-sensor:latest rpi/
 ```
 
 **3. On the server — start the storage and visualization stack:**
@@ -121,7 +156,7 @@ rpi/
     owm.py
   mosquitto/
     mosquitto.conf
-  quadlets/           # systemd quadlet units and timers
+  quadlets/           # systemd quadlet units (.container, .network, .volume) and timers
 server/
   compose.yml
   telegraf/
