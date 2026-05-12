@@ -6,8 +6,6 @@ After=mosquitto.service
 Image=localhost/airq-sensor:latest
 EnvironmentFile=%h/.airq/config.env
 Environment=SENSOR_TYPE=owm
-Environment=MQTT_HOST=mosquitto
-Environment=MQTT_PORT=1883
 Environment=MQTT_TOPIC=sensors/owm
 Network=airq.network
 

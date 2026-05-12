@@ -9,7 +9,7 @@ Two independent stacks communicate over the network:
 **Raspberry Pi** (`rpi/`) collects data:
 - One container per sensor, all built from a single image
 - Mosquitto as the local MQTT broker
-- Ofelia schedules measurements via `docker exec` into each container
+- systemd timers trigger each sensor container via quadlets
 
 **Server** (`server/`) stores and visualizes data:
 - Telegraf subscribes to the Pi's MQTT broker and writes to VictoriaMetrics
@@ -17,7 +17,7 @@ Two independent stacks communicate over the network:
 - Grafana serves the dashboards
 
 ```
-Sensors → measure.py (Ofelia job-exec) → MQTT → Telegraf → VictoriaMetrics → Grafana
+Sensors → measure.py (systemd timer) → MQTT → Telegraf → VictoriaMetrics → Grafana
 ```
 
 ## Sensors
@@ -42,21 +42,26 @@ The MH-Z19C requires the serial console on `/dev/ttyS0` to be disabled. On Raspb
 **1. Create the environment file:**
 
 ```bash
-cp .env.example .env
-# edit .env and fill in the required values
-```
-
-Or use the interactive prompt:
-
-```bash
 make init-dotenv
 ```
 
-**2. On the Raspberry Pi — build and start the sensor stack:**
+This writes `.env` in the repo root and copies it to `~/.airq/config.env` (read by the quadlets) and `~/.airq/mosquitto.conf`.
+
+Alternatively, copy and edit manually:
 
 ```bash
-make build-rpi
-make up-rpi
+cp .env.example .env
+mkdir -p ~/.airq
+cp .env ~/.airq/config.env
+cp rpi/mosquitto/mosquitto.conf ~/.airq/mosquitto.conf
+```
+
+**2. On the Raspberry Pi — build and install the sensor stack:**
+
+```bash
+make build-rpi       # build the sensor image
+make install-rpi     # install quadlets and timers into systemd
+make up-rpi          # enable and start mosquitto + all sensor timers
 ```
 
 **3. On the server — start the storage and visualization stack:**
@@ -74,12 +79,14 @@ Open `http://<server>:3000` and add VictoriaMetrics as a data source (type: Prom
 | Variable | Used by | Default | Description |
 |----------|---------|---------|-------------|
 | `TZ` | both | `UTC` | Timezone for timestamps |
+| `MQTT_HOST` | rpi | `mosquitto` | MQTT broker hostname (within the container network) |
+| `MQTT_PORT` | rpi | `1883` | MQTT broker port |
 | `OWM_API_KEY` | rpi | — | OpenWeatherMap API key (required) |
-| `LATITUDE` | rpi | `0` | Location latitude |
-| `LONGITUDE` | rpi | `0` | Location longitude |
-| `MQTT_BROKER` | server | — | Pi's IP or hostname |
+| `LATITUDE` | rpi | — | Location latitude |
+| `LONGITUDE` | rpi | — | Location longitude |
+| `MQTT_BROKER` | server | — | Pi's IP or hostname (used by Telegraf) |
 | `GRAFANA_USER` | server | `admin` | Grafana admin username |
-| `GRAFANA_PASSWORD` | server | `admin` | Grafana admin password |
+| `GRAFANA_PASSWORD` | server | — | Grafana admin password |
 | `SDS011_PORT` | rpi | `/dev/ttyUSB0` | SDS011 serial device |
 | `WARM_UP_TIME` | rpi | `15` | SDS011 warm-up seconds |
 | `COLLECT_TIME` | rpi | `15` | SDS011 collection window seconds |
@@ -89,11 +96,11 @@ Open `http://<server>:3000` and add VictoriaMetrics as a data source (type: Prom
 
 ```bash
 # Trigger a measurement manually
-docker exec bme680 python /app/measure.py
-docker exec mhz19 python /app/measure.py
+podman exec bme680 python /app/measure.py
+podman exec mhz19 python /app/measure.py
 
 # Watch live MQTT output
-docker exec mosquitto mosquitto_sub -t 'sensors/#' -v
+podman exec mosquitto mosquitto_sub -t 'sensors/#' -v
 
 # Run linting and pre-commit checks
 pre-commit run --all-files
@@ -114,7 +121,7 @@ rpi/
     owm.py
   mosquitto/
     mosquitto.conf
-  compose.yml
+  quadlets/           # systemd quadlet units and timers
 server/
   compose.yml
   telegraf/

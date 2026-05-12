@@ -1,6 +1,6 @@
 .PHONY: init-dotenv build-rpi install-rpi uninstall-rpi up-rpi down-rpi up-server down-server up-rpi-test down-rpi-test
 
-QUADLET_DIR := $(HOME)/.config/containers/systemd
+QUADLET_DIR := $(HOME)/.config/containers/systemd/airq
 SYSTEMD_DIR := $(HOME)/.config/systemd/user
 
 CONTAINERS := bme680.container mhz19.container mosquitto.container owm.container sds011.container
@@ -14,26 +14,24 @@ TIMER_TARGETS = $(addprefix rpi/quadlets/,$(TIMERS))
 
 
 init-dotenv:
-	@echo "Checking if airq.env file exists..."
-	@if [ ! -f airq.env ]; then \
-		echo "Creating .env file..."; \
-		read -p "OWM_API_KEY: " var1; \
-		read -p "LATITUDE: " var2; \
-		read -p "LONGITUDE: " var3; \
-		read -p "MQTT_BROKER (Pi IP or hostname): " var4; \
-		echo "OWM_API_KEY=$$var1" > .env; \
-		echo "LATITUDE=$$var2" >> .env; \
-		echo "LONGITUDE=$$var3" >> .env; \
-		echo "MQTT_BROKER=$$var4" >> .env; \
-		echo "TZ=UTC" >> .env; \
-		echo "AIRQ_PATH=$(PWD)" >> .env; \
-		mkdir -p $(HOME)/.airq/; \
-		cp .env $(HOME)/.airq/config.env; \
-		cp rpi/mosquitto/mosquitto.conf $(HOME)/.airq/mosquitto.conf; \
-		echo ".env created."; \
-	else \
-		echo ".env already exists."; \
+	@if [ -f .env ]; then \
+		echo ".env already exists — delete it to re-run init."; \
+		exit 0; \
 	fi
+	@read -p "OWM_API_KEY: " owm_key; \
+	read -p "LATITUDE: " lat; \
+	read -p "LONGITUDE: " lon; \
+	read -p "MQTT_BROKER (Pi IP or hostname): " broker; \
+	read -p "TZ (e.g. Europe/Berlin) [UTC]: " tz; \
+	read -p "GRAFANA_USER [admin]: " guser; \
+	read -p "GRAFANA_PASSWORD: " gpass; \
+	tz=$${tz:-UTC}; \
+	guser=$${guser:-admin}; \
+	printf "TZ=$$tz\n\nMQTT_HOST=mosquitto\nMQTT_PORT=1883\n\nOWM_API_KEY=$$owm_key\nLATITUDE=$$lat\nLONGITUDE=$$lon\n\nMQTT_BROKER=$$broker\n\nGRAFANA_USER=$$guser\nGRAFANA_PASSWORD=$$gpass\n" > .env; \
+	mkdir -p $(HOME)/.airq; \
+	cp .env $(HOME)/.airq/config.env; \
+	cp rpi/mosquitto/mosquitto.conf $(HOME)/.airq/mosquitto.conf; \
+	echo "Created .env and ~/.airq/config.env"
 
 build-rpi:
 	podman build -t airq-sensor:latest rpi/
@@ -47,9 +45,8 @@ install-rpi:
 	@echo "Done!"
 
 uninstall-rpi:
-	@rm -f $(CONTAINER_TARGETS)
-	@rm -f $(TIMER_TARGETS)
-	@rm -f $(MISC_TARGETS)
+	@rm -rf $(QUADLET_DIR)
+	@rm -f $(addprefix $(SYSTEMD_DIR)/,$(TIMERS))
 	@systemctl --user daemon-reload
 
 up-rpi:
